@@ -1,10 +1,10 @@
 {
   "name": "composer-diff",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Creates a commit message for changes in a composer.lock file",
   "dependencies": {
     "commander": "^2.9.0",
-    "nodegit": "^0.13.0"
+    "nodegit": "^0.5.0"
   },
   "devDependencies": {},
   "scripts": {
