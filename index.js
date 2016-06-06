@@ -2,7 +2,7 @@
 var fs = require('fs');
 var path = require('path');
 var process = require('process');
-var Git = require('nodegit');
+var child_process = require('child_process');
 var program = require('commander');
 
 program
@@ -102,16 +102,20 @@ function getComposerLock() {
 
 function getHeadComposerLock() {
     return new Promise(function(resolve, reject) {
-	Git.Repository.open(dir).then(function(repo) {
-	    return repo.getHeadCommit();
-	}).then(function(commit) {
-	    return commit.getEntry('composer.lock');
-	}).then(function(treeEntry) {
-	    return treeEntry.getBlob();
-	}).then(function(blob) {
-	    resolve(JSON.parse(blob.toString()));
-	}).catch(function(err) {
-	    reject(err);
+	var p = child_process.spawn('git', ['show', 'HEAD:composer.lock']);
+	var data = '';
+	p.stdout.on('data', function(out) {
+	    data += out;
+	});
+	p.stderr.on('data', function(err) {
+	    console.log(err);
+	});
+	p.on('error', function(err) {
+	    console.log(err);
+	    reject();
+	});
+	p.on('close', function() {
+	    resolve(JSON.parse(data));
 	});
     });
 }
