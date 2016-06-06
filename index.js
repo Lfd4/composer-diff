@@ -102,7 +102,9 @@ function getComposerLock() {
 
 function getHeadComposerLock() {
     return new Promise(function(resolve, reject) {
-	var p = child_process.spawn('git', ['show', 'HEAD:composer.lock']);
+	var p = child_process.spawn('git', ['show', 'HEAD:composer.lock'], {
+	    cwd: dir
+	});
 	var data = '';
 	p.stdout.on('data', function(out) {
 	    data += out;
