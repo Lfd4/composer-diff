@@ -28,12 +28,18 @@ function writeCommitMessage(diffs) {
     console.log('[TASK] Update packages');
     console.log('');
     diffs.forEach(function(diff) {
-	if (diff.version || diff.ref) {
-	    var str = '* ' + diff.pkg + ':';
+	var str = '* ' + diff.pkg;
+	if (diff.new) {
+	    str += ' was added';
+	    console.log(str);
+	} else if (diff.deleted) {
+	    str += ' was removed';
+	    console.log(str);
+	} else if (diff.version || diff.ref) {
 	    if (diff.version) {
-		str += ' ' + diff.version.old + ' => ' + diff.version.new;
+		str += ': ' + diff.version.old + ' => ' + diff.version.new;
 	    } else if (diff.ref) {
-		str += ' ' + diff.ref.old + ' => ' + diff.ref.new;
+		str += ': ' + diff.ref.old + ' => ' + diff.ref.new;
 	    }
 	    console.log(str);
 	}
@@ -83,7 +89,24 @@ function packageDiff(lock1, lock2) {
     var pkgs2 = lock2.packages;
     pkgs1.forEach(function(pkg) {
 	var pkg2 = packageByName(pkgs2, pkg.name);
-	diffs.push(comparePackages(pkg, pkg2));
+	if (pkg2) {
+	    diffs.push(comparePackages(pkg, pkg2));
+	} else {
+	    // package was deleted
+	    diffs.push({
+		pkg: pkg.name,
+		deleted: true
+	    });
+	}
+    });
+    pkgs2.forEach(function(pkg) {
+	var pkg2 = packageByName(pkgs1, pkg.name);
+	if (!pkg2) {
+	    diffs.push({
+		pkg: pkg.name,
+		new: true
+	    });
+	}
     });
     return diffs;
 }
